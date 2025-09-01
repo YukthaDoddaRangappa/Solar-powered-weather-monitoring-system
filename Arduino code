@@ -1,0 +1,44 @@
+#include <DHT.h>
+#include <Wire.h>
+#include <Adafruit_BMP085.h>
+
+// Define pins
+#define DHTPIN 2
+#define DHTTYPE DHT11
+#define LDR_PIN A0
+
+// Objects
+DHT dht(DHTPIN, DHTTYPE);
+Adafruit_BMP085 bmp;
+
+void setup() {
+  Serial.begin(9600); // Communication with ESP32
+  dht.begin();
+  if (!bmp.begin()) {
+    Serial.println("BMP180 not detected!");
+    while (1);
+  }
+}
+
+void loop() {
+  // Read DHT11
+  float temperature = dht.readTemperature();
+  float humidity = dht.readHumidity();
+
+  // Read LDR
+  int ldrValue = analogRead(LDR_PIN);
+
+  // Read BMP180
+  float pressure = bmp.readPressure() / 100.0; // hPa
+
+  // Send to ESP32 in CSV format
+  Serial.print(temperature);
+  Serial.print(",");
+  Serial.print(humidity);
+  Serial.print(",");
+  Serial.print(ldrValue);
+  Serial.print(",");
+  Serial.println(pressure);
+
+  delay(2000); // Every 2 sec
+}
